@@ -1,0 +1,43 @@
+ 
+<?xml version="1.0" encoding="utf-8"?>
+<extension type="module" version="4.0" client="site" method="upgrade">
+    <name>mod_joomlabuilder</name>
+    <author>BS Digital Services & Ventures</author>
+    <creationDate>2025-02-02</creationDate>
+    <copyright>BS Digital Services & Ventures</copyright>
+    <license>GNU General Public License</license>
+    <authorEmail>support@joomlabuilder.com</authorEmail>
+    <authorUrl>https://www.joomlabuilder.com</authorUrl>
+    <version>1.0.0</version>
+    <description>JoomlaBuilder Module - Provides dynamic JoomlaBuilder template features</description>
+
+    <files>
+        <filename module="mod_joomlabuilder">mod_joomlabuilder.php</filename>
+        <filename>helper.php</filename>
+        <filename>mod_joomlabuilder.xml</filename>
+        <folder>tmpl</folder>
+        <folder>assets</folder>
+        <folder>language</folder>
+    </files>
+
+    <config>
+        <fields name="params">
+            <fieldset name="basic">
+                <field name="layout" type="list" label="Layout" description="Select module layout" default="default">
+                    <option value="default">Default</option>
+                    <option value="custom">Custom</option>
+                </field>
+                <field name="enable_caching" type="radio" label="Enable Caching" description="Enable caching for improved performance." default="1">
+                    <option value="1">Yes</option>
+                    <option value="0">No</option>
+                </field>
+                <field name="module_class_sfx" type="text" label="Module Class Suffix" description="CSS class suffix for styling." />
+            </fieldset>
+        </fields>
+    </config>
+
+    <languages>
+        <language tag="en-GB">language/en-GB.mod_joomlabuilder.ini</language>
+        <language tag="en-GB">language/en-GB.mod_joomlabuilder.sys.ini</language>
+    </languages>
+</extension>

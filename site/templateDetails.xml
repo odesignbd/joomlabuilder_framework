@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension type="template" version="4.0" method="upgrade" client="site">
+    <name>JoomlaBuilder</name>
+    <author>BS Digital Services & Ventures</author>
+    <creationDate>2025-02-02</creationDate>
+    <copyright>BS Digital Services & Ventures</copyright>
+    <license>GNU General Public License</license>
+    <authorEmail>support@joomlabuilder.com</authorEmail>
+    <authorUrl>https://www.joomlabuilder.com</authorUrl>
+    <version>1.0.0</version>
+    <description>JoomlaBuilder Frontend Template - A modern, fully responsive, and customizable template framework.</description>
+
+    <files>
+        <folder>css</folder>
+        <folder>js</folder>
+        <folder>images</folder>
+        <folder>fonts</folder>
+        <folder>html</folder>
+        <filename>index.php</filename>
+        <filename>component.php</filename>
+        <filename>error.php</filename>
+        <filename>offline.php</filename>
+        <filename>templateDetails.xml</filename>
+        <filename>template_preview.png</filename>
+    </files>
+
+    <languages>
+        <language tag="en-GB">language/en-GB/en-GB.tpl_joomlabuilder.ini</language>
+        <language tag="en-GB">language/en-GB/en-GB.tpl_joomlabuilder.sys.ini</language>
+    </languages>
+
+    <positions>
+        <position>top</position>
+        <position>header</position>
+        <position>mainmenu</position>
+        <position>sidebar</position>
+        <position>content</position>
+        <position>footer</position>
+        <position>bottom</position>
+    </positions>
+
+    <config>
+        <fields name="params">
+            <fieldset name="basic">
+                <field name="template_color" type="color" label="Template Color" description="Select the primary color for the template." default="#007bff"/>
+                <field name="enable_darkmode" type="radio" label="Enable Dark Mode" description="Enable or disable dark mode." default="0">
+                    <option value="1">Yes</option>
+                    <option value="0">No</option>
+                </field>
+                <field name="font_family" type="list" label="Font Family" description="Choose the template font family." default="Arial">
+                    <option value="Arial">Arial</option>
+                    <option value="Verdana">Verdana</option>
+                    <option value="Roboto">Roboto</option>
+                    <option value="Open Sans">Open Sans</option>
+                </field>
+            </fieldset>
+        </fields>
+    </config>
+</extension>
+ 

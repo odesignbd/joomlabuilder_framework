@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension type="plugin" version="4.0" method="upgrade" group="system">
+    <name>plg_system_joomlabuilder</name>
+    <author>BS Digital Services & Ventures</author>
+    <creationDate>2025-02-02</creationDate>
+    <copyright>BS Digital Services & Ventures</copyright>
+    <license>GNU General Public License</license>
+    <authorEmail>support@joomlabuilder.com</authorEmail>
+    <authorUrl>https://www.joomlabuilder.com</authorUrl>
+    <version>1.0.0</version>
+    <description>JoomlaBuilder System Plugin - Provides advanced template framework functionalities.</description>
+
+    <files>
+        <folder>core</folder>
+        <folder>logs</folder>
+        <folder>assets</folder>
+        <folder>language</folder>
+        <filename>plg_system_joomlabuilder.php</filename>
+        <filename>params.php</filename>
+        <filename>event.php</filename>
+        <filename>helpers.php</filename>
+        <filename>logs/joomlabuilder.log.php</filename>
+    </files>
+
+    <languages>
+        <language tag="en-GB">language/en-GB/plg_system_joomlabuilder.ini</language>
+        <language tag="en-GB">language/en-GB/plg_system_joomlabuilder.sys.ini</language>
+    </languages>
+
+    <config>
+        <fields name="params">
+            <fieldset name="basic">
+                <field name="enable_debug" type="radio" label="Enable Debugging" description="Enable or disable debugging for JoomlaBuilder." default="0">
+                    <option value="1">Enabled</option>
+                    <option value="0">Disabled</option>
+                </field>
+                <field name="auto_update" type="radio" label="Enable Auto Update" description="Automatically check for plugin updates." default="1">
+                    <option value="1">Yes</option>
+                    <option value="0">No</option>
+                </field>
+                <field name="log_level" type="list" label="Log Level" description="Set the level of logging detail." default="info">
+                    <option value="debug">Debug</option>
+                    <option value="info">Info</option>
+                    <option value="warning">Warning</option>
+                    <option value="error">Error</option>
+                </field>
+                <field name="security_check" type="radio" label="Enable Security Check" description="Perform security check on each execution." default="1">
+                    <option value="1">Yes</option>
+                    <option value="0">No</option>
+                </field>
+            </fieldset>
+        </fields>
+    </config>
+</extension>

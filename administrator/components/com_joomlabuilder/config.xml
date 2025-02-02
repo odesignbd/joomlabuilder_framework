@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension type="component" version="4.0" method="upgrade">
+    <name>com_joomlabuilder</name>
+    <author>BS Digital Services & Ventures</author>
+    <creationDate>2025-02-02</creationDate>
+    <copyright>BS Digital Services & Ventures</copyright>
+    <license>GNU General Public License</license>
+    <authorEmail>support@joomlabuilder.com</authorEmail>
+    <authorUrl>https://www.joomlabuilder.com</authorUrl>
+    <version>1.0.0</version>
+    <description>JoomlaBuilder is a powerful template framework designed to provide advanced features for Joomla users.</description>
+
+    <install>
+        <sql>
+            <file driver="mysql">sql/install.mysql.utf8.sql</file>
+        </sql>
+    </install>
+
+    <uninstall>
+        <sql>
+            <file driver="mysql">sql/uninstall.mysql.utf8.sql</file>
+        </sql>
+    </uninstall>
+
+    <update>
+        <schemas>
+            <schemapath type="mysql">sql/updates</schemapath>
+        </schemas>
+    </update>
+
+    <files folder="admin">
+        <filename>component.php</filename>
+        <folder>controllers</folder>
+        <folder>models</folder>
+        <folder>views</folder>
+        <folder>helpers</folder>
+        <folder>layouts</folder>
+        <filename>config.xml</filename>
+    </files>
+
+    <administration>
+        <menu link="index.php?option=com_joomlabuilder" img="joomlabuilder.png">Joomla Builder</menu>
+        <submenus>
+            <submenu link="index.php?option=com_joomlabuilder&view=dashboard">Dashboard</submenu>
+            <submenu link="index.php?option=com_joomlabuilder&view=templates">Templates</submenu>
+            <submenu link="index.php?option=com_joomlabuilder&view=settings">Settings</submenu>
+        </submenus>
+    </administration>
+
+    <config>
+        <fields name="params">
+            <fieldset name="basic">
+                <field name="enable_logging" type="radio" label="Enable Logging" description="Enable or disable logging for Joomla Builder." default="1">
+                    <option value="1">Yes</option>
+                    <option value="0">No</option>
+                </field>
+                <field name="debug_mode" type="radio" label="Debug Mode" description="Enable or disable debug mode for development." default="0">
+                    <option value="1">Enabled</option>
+                    <option value="0">Disabled</option>
+                </field>
+                <field name="default_template" type="text" label="Default Template" description="Set the default template to use." default="joomlabuilder_default" />
+            </fieldset>
+        </fields>
+    </config>
+</extension>
+ 

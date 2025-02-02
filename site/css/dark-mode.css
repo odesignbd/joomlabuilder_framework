@@ -1,0 +1,28 @@
+/* JoomlaBuilder Frontend Template - Dark Mode Styles */
+
+body.dark-mode {
+    background-color: #121212;
+    color: #ffffff;
+}
+
+.dark-mode .header {
+    background: #1f1f1f;
+}
+
+.dark-mode .navbar {
+    background: #333;
+}
+
+.dark-mode .navbar a {
+    color: #ffffff;
+}
+
+.dark-mode .navbar a:hover {
+    background: #555;
+}
+
+.dark-mode .footer {
+    background: #222;
+    color: #bbb;
+}
+ 

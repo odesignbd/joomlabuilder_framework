@@ -1,0 +1,58 @@
+ 
+/* JoomlaBuilder Module Styles */
+
+.mod-joomlabuilder {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.mod-joomlabuilder h3 {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 15px;
+}
+
+.mod-joomlabuilder .template-item {
+    padding: 10px;
+    margin-bottom: 10px;
+    background: #ffffff;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    transition: all 0.3s ease;
+}
+
+.mod-joomlabuilder .template-item:hover {
+    background: #e9ecef;
+    border-color: #adb5bd;
+}
+
+.mod-joomlabuilder .template-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #007bff;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.mod-joomlabuilder .template-title:hover {
+    color: #0056b3;
+}
+
+.mod-joomlabuilder .btn {
+    display: inline-block;
+    padding: 8px 12px;
+    font-size: 1rem;
+    border-radius: 4px;
+    text-decoration: none;
+    background: #007bff;
+    color: #fff;
+    transition: background 0.3s ease;
+}
+
+.mod-joomlabuilder .btn:hover {
+    background: #0056b3;
+}

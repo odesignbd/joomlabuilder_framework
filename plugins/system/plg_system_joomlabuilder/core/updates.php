@@ -1,110 +1,78 @@
 <?php
+/**
+ * JoomlaBuilder Auto Update System
+ * @package     JoomlaBuilder
+ * @subpackage  Plugin Update Management
+ * @author      BS Digital Services & Ventures
+ * @license     GNU General Public License
+ */
+
 // No direct access
 defined('_JEXEC') or die('Restricted access');
 
 use Joomla\CMS\Factory;
 use Joomla\CMS\Http\HttpFactory;
 use Joomla\CMS\Log\Log;
-use Joomla\CMS\Language\Text;
 use Joomla\CMS\Filesystem\File;
-use Joomla\CMS\Filesystem\Folder;
 
-class JoomlaBuilderUpdate
+class JoomlaBuilderUpdater
 {
     /**
-     * Checks for available updates.
-     *
-     * @return void
+     * Check for updates
+     * @return array|false Update details if available, false if no update
      */
     public static function checkForUpdates()
     {
+        $http = HttpFactory::getHttp();
+        $updateUrl = 'https://update.joomlabuilder.com/latest.json';
+        
         try {
-            $updateUrl = 'https://updates.joomlabuilder.com/latest.json';
-            $http = HttpFactory::getHttp();
             $response = $http->get($updateUrl);
-            $updateData = json_decode($response->body, true);
-
-            if (!empty($updateData['version']) && self::isNewVersionAvailable($updateData['version'])) {
-                Factory::getApplication()->enqueueMessage(Text::sprintf('PLG_SYSTEM_JOOMLABUILDER_NEW_UPDATE_AVAILABLE', $updateData['version']), 'notice');
+            $data = json_decode($response->body, true);
+            
+            if (!isset($data['version'])) {
+                return false;
+            }
+            
+            $currentVersion = Factory::getApplication()->get('joomlabuilder_version');
+            
+            if (version_compare($data['version'], $currentVersion, '>')) {
+                return $data;
             }
         } catch (Exception $e) {
-            Log::add(Text::_('PLG_SYSTEM_JOOMLABUILDER_UPDATE_CHECK_ERROR') . ': ' . $e->getMessage(), Log::ERROR, 'plg_system_joomlabuilder');
+            Log::add('Update check failed: ' . $e->getMessage(), Log::ERROR, 'plg_system_joomlabuilder');
         }
-    }
-
-    /**
-     * Determines if a new version is available.
-     *
-     * @param string $newVersion The latest available version.
-     * @return bool True if an update is available, false otherwise.
-     */
-    private static function isNewVersionAvailable($newVersion)
-    {
-        $currentVersion = self::getCurrentVersion();
-        return version_compare($currentVersion, $newVersion, '<');
-    }
-
-    /**
-     * Gets the current installed version of JoomlaBuilder.
-     *
-     * @return string The installed version.
-     */
-    private static function getCurrentVersion()
-    {
-        $db = Factory::getDbo();
-        $query = $db->getQuery(true)
-            ->select($db->quoteName('value'))
-            ->from($db->quoteName('#__joomlabuilder_settings'))
-            ->where($db->quoteName('key') . ' = ' . $db->quote('joomlabuilder_version'));
-        $db->setQuery($query);
-        return $db->loadResult() ?: '1.0.0';
-    }
-
-    /**
-     * Downloads and installs the latest update.
-     *
-     * @return bool True on success, false on failure.
-     */
-    public static function downloadAndInstallUpdate()
-    {
-        try {
-            $updateUrl = 'https://updates.joomlabuilder.com/latest.zip';
-            $tempFile = JPATH_SITE . '/tmp/joomlabuilder_update.zip';
-            $installPath = JPATH_SITE . '/tmp/joomlabuilder_update/';
-            
-            // Download the update package
-            $http = HttpFactory::getHttp();
-            $response = $http->get($updateUrl);
-            File::write($tempFile, $response->body);
-            
-            // Extract the update package
-            Folder::create($installPath);
-            JArchive::extract($tempFile, $installPath);
-            
-            // Perform update installation (manual processing required)
-            self::processUpdateInstallation($installPath);
-            
-            return true;
-        } catch (Exception $e) {
-            Log::add(Text::_('PLG_SYSTEM_JOOMLABUILDER_UPDATE_INSTALL_ERROR') . ': ' . $e->getMessage(), Log::ERROR, 'plg_system_joomlabuilder');
-            return false;
-        }
-    }
-
-    /**
-     * Processes the update installation.
-     *
-     * @param string $installPath The extracted update folder.
-     * @return void
-     */
-    private static function processUpdateInstallation($installPath)
-    {
-        // Move new files to the Joomla system
-        $destination = JPATH_SITE . '/plugins/system/joomlabuilder/';
-        Folder::move($installPath, $destination);
         
-        // Log successful update
-        Log::add(Text::_('PLG_SYSTEM_JOOMLABUILDER_UPDATE_SUCCESS'), Log::INFO, 'plg_system_joomlabuilder');
+        return false;
+    }
+
+    /**
+     * Download and install an update
+     * @param string $downloadUrl URL to the update package
+     * @return bool True on success, false on failure
+     */
+    public static function installUpdate($downloadUrl)
+    {
+        $http = HttpFactory::getHttp();
+        $tmpPath = JPATH_SITE . '/tmp/joomlabuilder_update.zip';
+        
+        try {
+            $response = $http->get($downloadUrl);
+            File::write($tmpPath, $response->body);
+            
+            // Extract and replace files (simplified example)
+            $zip = new ZipArchive;
+            if ($zip->open($tmpPath) === true) {
+                $zip->extractTo(JPATH_SITE);
+                $zip->close();
+                File::delete($tmpPath);
+                Log::add('Update installed successfully', Log::INFO, 'plg_system_joomlabuilder');
+                return true;
+            }
+        } catch (Exception $e) {
+            Log::add('Update installation failed: ' . $e->getMessage(), Log::ERROR, 'plg_system_joomlabuilder');
+        }
+        
+        return false;
     }
 }
- 

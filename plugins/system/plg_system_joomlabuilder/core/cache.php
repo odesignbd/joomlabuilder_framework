@@ -1,18 +1,23 @@
 <?php
+/**
+ * JoomlaBuilder Caching System
+ * @package     JoomlaBuilder
+ * @subpackage  Plugin Cache Management
+ * @author      BS Digital Services & Ventures
+ * @license     GNU General Public License
+ */
+
 // No direct access
 defined('_JEXEC') or die('Restricted access');
 
 use Joomla\CMS\Factory;
-use Joomla\CMS\Cache\CacheControllerFactory;
-use Joomla\CMS\Cache\Cache;
-use Joomla\CMS\Language\Text;
+use Joomla\CMS\Cache\CacheController;
 
 class JoomlaBuilderCache
 {
     /**
-     * Retrieves the cache instance for JoomlaBuilder.
-     *
-     * @return Cache The cache instance.
+     * Retrieve cache instance
+     * @return CacheController Cache object
      */
     public static function getCache()
     {
@@ -20,72 +25,40 @@ class JoomlaBuilderCache
     }
 
     /**
-     * Stores data in the cache.
-     *
-     * @param string $key The cache key.
-     * @param mixed $data The data to store.
-     * @param int $lifetime The cache lifetime in seconds.
-     * @return bool True on success, false on failure.
+     * Store data in cache
+     * @param string $key Cache key
+     * @param mixed  $data Data to store
+     * @param int    $lifetime Cache lifetime in seconds (default: 3600)
      */
-    public static function setCache($key, $data, $lifetime = 3600)
+    public static function set($key, $data, $lifetime = 3600)
     {
-        try {
-            $cache = self::getCache();
-            return $cache->store($data, $key, '', $lifetime);
-        } catch (Exception $e) {
-            Factory::getApplication()->enqueueMessage(Text::_('PLG_SYSTEM_JOOMLABUILDER_CACHE_ERROR') . ': ' . $e->getMessage(), 'error');
-            return false;
-        }
+        $cache = self::getCache();
+        $cache->setCaching(true);
+        $cache->store($data, $key, 'plg_system_joomlabuilder', $lifetime);
     }
 
     /**
-     * Retrieves data from the cache.
-     *
-     * @param string $key The cache key.
-     * @return mixed The cached data or false if not found.
+     * Retrieve data from cache
+     * @param string $key Cache key
+     * @return mixed Cached data or false if not found
      */
-    public static function getCacheData($key)
+    public static function get($key)
     {
-        try {
-            $cache = self::getCache();
-            return $cache->get($key);
-        } catch (Exception $e) {
-            Factory::getApplication()->enqueueMessage(Text::_('PLG_SYSTEM_JOOMLABUILDER_CACHE_ERROR_RETRIEVE') . ': ' . $e->getMessage(), 'error');
-            return false;
-        }
+        $cache = self::getCache();
+        return $cache->get($key, 'plg_system_joomlabuilder');
     }
 
     /**
-     * Clears a specific cache key.
-     *
-     * @param string $key The cache key to clear.
-     * @return bool True on success, false on failure.
+     * Clear cache
+     * @param string $key Optional specific key to clear (default: clear all cache)
      */
-    public static function clearCacheKey($key)
+    public static function clear($key = null)
     {
-        try {
-            $cache = self::getCache();
-            return $cache->remove($key);
-        } catch (Exception $e) {
-            Factory::getApplication()->enqueueMessage(Text::_('PLG_SYSTEM_JOOMLABUILDER_CACHE_ERROR_CLEAR') . ': ' . $e->getMessage(), 'error');
-            return false;
-        }
-    }
-
-    /**
-     * Clears all JoomlaBuilder cache.
-     *
-     * @return bool True on success, false on failure.
-     */
-    public static function clearAllCache()
-    {
-        try {
-            $cache = self::getCache();
-            return $cache->clean();
-        } catch (Exception $e) {
-            Factory::getApplication()->enqueueMessage(Text::_('PLG_SYSTEM_JOOMLABUILDER_CACHE_ERROR_CLEAR_ALL') . ': ' . $e->getMessage(), 'error');
-            return false;
+        $cache = self::getCache();
+        if ($key) {
+            $cache->remove($key, 'plg_system_joomlabuilder');
+        } else {
+            $cache->clean('plg_system_joomlabuilder');
         }
     }
 }
- 

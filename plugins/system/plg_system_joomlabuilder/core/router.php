@@ -1,68 +1,64 @@
- 
 <?php
+/**
+ * JoomlaBuilder Router System
+ * @package     JoomlaBuilder
+ * @subpackage  Plugin Routing Management
+ * @author      BS Digital Services & Ventures
+ * @license     GNU General Public License
+ */
+
 // No direct access
 defined('_JEXEC') or die('Restricted access');
 
 use Joomla\CMS\Router\RouterView;
-use Joomla\CMS\Router\RouterViewConfiguration;
-use Joomla\CMS\Router\Route;
+use Joomla\CMS\Router\RouterRulesInterface;
 use Joomla\CMS\Factory;
 
-class JoomlaBuilderRouter extends RouterView
+class JoomlaBuilderRouter extends RouterView implements RouterRulesInterface
 {
-    public function __construct($app = null, $menu = null)
-    {
-        $app = $app ?: Factory::getApplication();
-        $menu = $menu ?: $app->getMenu();
-        parent::__construct($app, $menu);
-
-        // Define the default view
-        $this->registerView(new RouterViewConfiguration('dashboard'));
-        $this->registerView(new RouterViewConfiguration('templates'));
-        $this->registerView(new RouterViewConfiguration('settings'));
-    }
-
     /**
-     * Processes a SEF URL and maps it to the internal Joomla structure.
-     *
-     * @param array $segments The URL segments.
-     * @return array The mapped query parameters.
+     * Constructor
+     * @param object $app Joomla Application Instance
+     * @param array  $params Component Parameters
      */
-    public function parse(&$segments)
+    public function __construct($app, $params)
     {
-        $vars = [];
-        
-        if (!empty($segments[0])) {
-            $vars['view'] = $segments[0];
-        }
-
-        if (!empty($segments[1])) {
-            $vars['id'] = (int) $segments[1];
-        }
-        
-        return $vars;
+        parent::__construct($app, $params);
     }
 
     /**
-     * Constructs a SEF URL from Joomla query parameters.
-     *
-     * @param array $query The Joomla query parameters.
-     * @return array The SEF URL segments.
+     * Build SEF URL
+     * @param array $query URL Query Parameters
+     * @return array Processed Segments for SEF URL
      */
     public function build(&$query)
     {
         $segments = [];
-
-        if (!empty($query['view'])) {
+        if (isset($query['view'])) {
             $segments[] = $query['view'];
             unset($query['view']);
         }
-
-        if (!empty($query['id'])) {
-            $segments[] = (int) $query['id'];
+        if (isset($query['id'])) {
+            $segments[] = $query['id'];
             unset($query['id']);
         }
-        
         return $segments;
+    }
+
+    /**
+     * Parse SEF URL
+     * @param array $segments URL Segments
+     * @return array Query Variables
+     */
+    public function parse(&$segments)
+    {
+        $vars = [];
+        if (!empty($segments[0])) {
+            $vars['view'] = $segments[0];
+        }
+        if (!empty($segments[1])) {
+            $vars['id'] = (int) $segments[1];
+        }
+        return $vars;
     }
 }

@@ -1,103 +1,75 @@
 <?php
+/**
+ * JoomlaBuilder Task Scheduler
+ * @package     JoomlaBuilder
+ * @subpackage  Plugin Task Scheduling
+ * @author      BS Digital Services & Ventures
+ * @license     GNU General Public License
+ */
+
 // No direct access
 defined('_JEXEC') or die('Restricted access');
 
 use Joomla\CMS\Factory;
 use Joomla\CMS\Log\Log;
+use Joomla\CMS\Plugin\CMSPlugin;
 use Joomla\CMS\Date\Date;
-use Joomla\CMS\Language\Text;
 
 class JoomlaBuilderScheduler
 {
     /**
-     * Executes scheduled tasks for JoomlaBuilder.
-     *
+     * Schedule a task for execution
+     * @param string $taskName Task name
+     * @param callable $callback Function to execute
+     * @param string $interval Interval for execution (e.g., 'daily', 'hourly')
      * @return void
      */
-    public static function runScheduledTasks()
+    public static function scheduleTask($taskName, callable $callback, $interval = 'daily')
     {
-        try {
-            // Check last execution time
-            $lastRun = self::getLastRunTime();
-            $currentTime = new Date();
+        $db = Factory::getDbo();
+        $query = $db->getQuery(true);
+        $query->select('*')
+            ->from($db->quoteName('#__joomlabuilder_tasks'))
+            ->where($db->quoteName('task_name') . ' = ' . $db->quote($taskName));
+        $db->setQuery($query);
+        $task = $db->loadObject();
+
+        $now = new Date();
+        if (!$task || strtotime($task->last_run) + self::getIntervalSeconds($interval) < time()) {
+            $callback();
             
-            // Run scheduled tasks only if an interval has passed
-            if (self::shouldExecute($lastRun, $currentTime)) {
-                self::performTasks();
-                self::updateLastRunTime($currentTime);
+            $query = $db->getQuery(true);
+            if ($task) {
+                $query->update($db->quoteName('#__joomlabuilder_tasks'))
+                    ->set($db->quoteName('last_run') . ' = ' . $db->quote($now->toSql()))
+                    ->where($db->quoteName('task_name') . ' = ' . $db->quote($taskName));
+            } else {
+                $query->insert($db->quoteName('#__joomlabuilder_tasks'))
+                    ->columns($db->quoteName(['task_name', 'last_run']))
+                    ->values($db->quote($taskName) . ', ' . $db->quote($now->toSql()));
             }
-        } catch (Exception $e) {
-            Log::add(Text::_('PLG_SYSTEM_JOOMLABUILDER_SCHEDULER_ERROR') . ': ' . $e->getMessage(), Log::ERROR, 'plg_system_joomlabuilder');
+            $db->setQuery($query);
+            $db->execute();
+            Log::add('Task ' . $taskName . ' executed successfully.', Log::INFO, 'plg_system_joomlabuilder');
         }
     }
 
     /**
-     * Determines if scheduled tasks should execute.
-     *
-     * @param Date|null $lastRun Last execution time.
-     * @param Date $currentTime Current time.
-     * @return bool True if execution should proceed, false otherwise.
+     * Convert interval string to seconds
+     * @param string $interval Interval format (e.g., 'daily', 'hourly')
+     * @return int Interval in seconds
      */
-    private static function shouldExecute($lastRun, $currentTime)
+    private static function getIntervalSeconds($interval)
     {
-        if (!$lastRun) {
-            return true;
+        switch ($interval) {
+            case 'hourly':
+                return 3600;
+            case 'daily':
+                return 86400;
+            case 'weekly':
+                return 604800;
+            default:
+                return 86400;
         }
-        
-        // Define execution interval (e.g., every 24 hours)
-        $intervalHours = 24;
-        $intervalSeconds = $intervalHours * 3600;
-        
-        return ($currentTime->toUnix() - $lastRun->toUnix()) >= $intervalSeconds;
-    }
-
-    /**
-     * Performs scheduled JoomlaBuilder tasks.
-     *
-     * @return void
-     */
-    private static function performTasks()
-    {
-        // Example task: Clean outdated cache
-        JoomlaBuilderCache::clearAllCache();
-        
-        // Example task: Log execution
-        Log::add(Text::_('PLG_SYSTEM_JOOMLABUILDER_SCHEDULER_EXECUTED'), Log::INFO, 'plg_system_joomlabuilder');
-    }
-
-    /**
-     * Retrieves the last run time of scheduled tasks.
-     *
-     * @return Date|null Last execution time or null if not set.
-     */
-    private static function getLastRunTime()
-    {
-        $db = Factory::getDbo();
-        $query = $db->getQuery(true)
-            ->select($db->quoteName('value'))
-            ->from($db->quoteName('#__joomlabuilder_settings'))
-            ->where($db->quoteName('key') . ' = ' . $db->quote('scheduler_last_run'));
-        $db->setQuery($query);
-        
-        $result = $db->loadResult();
-        return $result ? new Date($result) : null;
-    }
-
-    /**
-     * Updates the last run time of scheduled tasks.
-     *
-     * @param Date $time The current time.
-     * @return void
-     */
-    private static function updateLastRunTime($time)
-    {
-        $db = Factory::getDbo();
-        $query = $db->getQuery(true)
-            ->update($db->quoteName('#__joomlabuilder_settings'))
-            ->set($db->quoteName('value') . ' = ' . $db->quote($time->toSql()))
-            ->where($db->quoteName('key') . ' = ' . $db->quote('scheduler_last_run'));
-        $db->setQuery($query);
-        $db->execute();
     }
 }
- 

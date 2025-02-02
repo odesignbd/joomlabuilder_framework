@@ -1,70 +1,70 @@
 <?php
+/**
+ * JoomlaBuilder Helper Functions
+ * @package     JoomlaBuilder
+ * @subpackage  Plugin Helpers
+ * @author      BS Digital Services & Ventures
+ * @license     GNU General Public License
+ */
+
 // No direct access
 defined('_JEXEC') or die('Restricted access');
 
 use Joomla\CMS\Factory;
-use Joomla\CMS\User\User;
-use Joomla\CMS\Uri\Uri;
 use Joomla\CMS\Log\Log;
-use Joomla\CMS\Language\Text;
-use Joomla\CMS\Filesystem\File;
-use Joomla\CMS\Filesystem\Folder;
+use Joomla\Registry\Registry;
 
 class JoomlaBuilderHelper
 {
     /**
-     * Retrieves the current logged-in user details.
-     *
-     * @return User|null Joomla user object or null if no user is logged in.
+     * Get plugin parameters
+     * @return Registry Plugin parameters
      */
-    public static function getCurrentUser()
+    public static function getParams()
     {
-        return Factory::getUser();
+        $plugin = Factory::getApplication()->getPlugin('system', 'joomlabuilder');
+        return new Registry($plugin->params);
     }
 
     /**
-     * Generates a secure token for CSRF protection.
-     *
-     * @return string Secure token.
+     * Write log entry
+     * @param string $message Log message
+     * @param string $level Log level (INFO, WARNING, ERROR)
      */
-    public static function getCsrfToken()
-    {
-        return Factory::getSession()->getFormToken();
-    }
-
-    /**
-     * Writes log entries for JoomlaBuilder.
-     *
-     * @param string $message The log message.
-     * @param string $level The log level (debug, info, warning, error).
-     */
-    public static function logEvent($message, $level = 'info')
+    public static function log($message, $level = 'INFO')
     {
         Log::add($message, constant('JLog::' . strtoupper($level)), 'plg_system_joomlabuilder');
     }
 
     /**
-     * Deletes a directory and its contents.
-     *
-     * @param string $path Path to the directory.
-     * @return bool True on success, false on failure.
+     * Fetch Joomla user details
+     * @param int $userId Joomla user ID
+     * @return object User data
      */
-    public static function deleteDirectory($path)
+    public static function getUser($userId)
     {
-        if (Folder::exists($path)) {
-            return Folder::delete($path);
-        }
-        return false;
+        return Factory::getUser($userId);
     }
 
     /**
-     * Retrieves the site base URL.
-     *
-     * @return string Base URL.
+     * Generate a secure token
+     * @return string Secure CSRF token
      */
-    public static function getBaseUrl()
+    public static function generateToken()
     {
-        return Uri::base();
+        return Factory::getSession()->getFormToken();
+    }
+
+    /**
+     * Sanitize input data
+     * @param mixed $data Input data
+     * @return mixed Sanitized data
+     */
+    public static function sanitize($data)
+    {
+        if (is_array($data)) {
+            return array_map('htmlspecialchars', $data);
+        }
+        return htmlspecialchars($data, ENT_QUOTES, 'UTF-8');
     }
 }
- 

@@ -1,58 +1,47 @@
- 
 <?php
+/**
+ * JoomlaBuilder Debugging System
+ * @package     JoomlaBuilder
+ * @subpackage  Plugin Debug Management
+ * @author      BS Digital Services & Ventures
+ * @license     GNU General Public License
+ */
+
 // No direct access
 defined('_JEXEC') or die('Restricted access');
 
 use Joomla\CMS\Factory;
 use Joomla\CMS\Log\Log;
-use Joomla\CMS\Language\Text;
 
 class JoomlaBuilderDebug
 {
     /**
-     * Logs debug messages to Joomla's log system.
-     *
-     * @param string $message The debug message.
-     * @param string $level The log level (debug, warning, error).
+     * Enable debugging mode
      */
-    public static function logMessage($message, $level = 'debug')
+    public static function enableDebug()
     {
-        try {
-            Log::add($message, constant('JLog::' . strtoupper($level)), 'plg_system_joomlabuilder');
-        } catch (Exception $e) {
-            Factory::getApplication()->enqueueMessage(Text::_('PLG_SYSTEM_JOOMLABUILDER_DEBUG_ERROR') . ': ' . $e->getMessage(), 'error');
-        }
+        $config = Factory::getConfig();
+        $config->set('debug', 1);
+        Log::add('JoomlaBuilder Debugging Enabled', Log::INFO, 'plg_system_joomlabuilder');
     }
 
     /**
-     * Logs an error message.
-     *
-     * @param string $error The error message.
+     * Disable debugging mode
      */
-    public static function logError($error)
+    public static function disableDebug()
     {
-        self::logMessage($error, 'error');
+        $config = Factory::getConfig();
+        $config->set('debug', 0);
+        Log::add('JoomlaBuilder Debugging Disabled', Log::INFO, 'plg_system_joomlabuilder');
     }
 
     /**
-     * Retrieves the last N log entries.
-     *
-     * @param int $limit The number of log entries to retrieve.
-     * @return array List of log entries.
+     * Log debug message
+     * @param string $message Debug message
+     * @param string $level Debug level (INFO, WARNING, ERROR)
      */
-    public static function getLogEntries($limit = 50)
+    public static function log($message, $level = 'INFO')
     {
-        try {
-            $logPath = JPATH_LOGS . '/plg_system_joomlabuilder.php';
-            if (!file_exists($logPath)) {
-                return [];
-            }
-            
-            $lines = array_reverse(file($logPath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES));
-            return array_slice($lines, 0, $limit);
-        } catch (Exception $e) {
-            Factory::getApplication()->enqueueMessage(Text::_('PLG_SYSTEM_JOOMLABUILDER_DEBUG_READ_ERROR') . ': ' . $e->getMessage(), 'error');
-            return [];
-        }
+        Log::add('[DEBUG] ' . $message, constant('JLog::' . strtoupper($level)), 'plg_system_joomlabuilder');
     }
 }

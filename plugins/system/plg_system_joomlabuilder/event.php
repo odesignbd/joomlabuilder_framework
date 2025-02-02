@@ -1,62 +1,66 @@
 <?php
+/**
+ * JoomlaBuilder Plugin Events Handler
+ * @package     JoomlaBuilder
+ * @subpackage  Plugin Events
+ * @author      BS Digital Services & Ventures
+ * @license     GNU General Public License
+ */
+
 // No direct access
 defined('_JEXEC') or die('Restricted access');
 
 use Joomla\CMS\Factory;
-use Joomla\CMS\Plugin\CMSPlugin;
 use Joomla\CMS\Log\Log;
-use Joomla\CMS\Language\Text;
 
-class PlgSystemJoomlaBuilderEvent extends CMSPlugin
+class JoomlaBuilderEvent
 {
     /**
-     * Event triggered after the application is initialized.
+     * Trigger event when a new article is created
+     * @param   object  $context  The context of the content passed to the plugin
+     * @param   object  $article  The article data
+     * @param   bool    $isNew    Indicates if the article is new
      */
-    public function onAfterInitialise()
+    public static function onContentAfterSave($context, &$article, $isNew)
     {
-        Log::add(Text::_('PLG_SYSTEM_JOOMLABUILDER_EVENT_INIT'), Log::INFO, 'plg_system_joomlabuilder');
+        if ($context !== 'com_content.article') {
+            return;
+        }
+
+        $status = $isNew ? 'created' : 'updated';
+        Log::add('Article ' . $article->id . ' has been ' . $status . '.', Log::INFO, 'plg_system_joomlabuilder');
     }
 
     /**
-     * Event triggered before rendering the page.
+     * Trigger event before an article is deleted
+     * @param   object  $context  The context of the content passed to the plugin
+     * @param   object  $article  The article data
      */
-    public function onBeforeRender()
+    public static function onContentBeforeDelete($context, &$article)
     {
-        Log::add(Text::_('PLG_SYSTEM_JOOMLABUILDER_EVENT_BEFORE_RENDER'), Log::INFO, 'plg_system_joomlabuilder');
+        if ($context !== 'com_content.article') {
+            return;
+        }
+
+        Log::add('Article ' . $article->id . ' is about to be deleted.', Log::WARNING, 'plg_system_joomlabuilder');
     }
 
     /**
-     * Event triggered after the page is rendered.
+     * Trigger event when a user logs in
+     * @param   array   $user     User details
+     * @param   array   $options  Login options
      */
-    public function onAfterRender()
+    public static function onUserLogin($user, $options = array())
     {
-        Log::add(Text::_('PLG_SYSTEM_JOOMLABUILDER_EVENT_AFTER_RENDER'), Log::INFO, 'plg_system_joomlabuilder');
+        Log::add('User ' . $user['username'] . ' has logged in.', Log::INFO, 'plg_system_joomlabuilder');
     }
 
     /**
-     * Event triggered before saving content.
-     *
-     * @param string $context The context of the content being saved.
-     * @param object $article The article object.
-     * @param bool $isNew Indicates if the content is new.
-     * @return void
+     * Trigger event when a user logs out
+     * @param   array   $user  User details
      */
-    public function onContentBeforeSave($context, $article, $isNew)
+    public static function onUserLogout($user)
     {
-        Log::add(Text::_('PLG_SYSTEM_JOOMLABUILDER_EVENT_BEFORE_SAVE'), Log::INFO, 'plg_system_joomlabuilder');
-    }
-
-    /**
-     * Event triggered after saving content.
-     *
-     * @param string $context The context of the content being saved.
-     * @param object $article The article object.
-     * @param bool $isNew Indicates if the content is new.
-     * @return void
-     */
-    public function onContentAfterSave($context, $article, $isNew)
-    {
-        Log::add(Text::_('PLG_SYSTEM_JOOMLABUILDER_EVENT_AFTER_SAVE'), Log::INFO, 'plg_system_joomlabuilder');
+        Log::add('User ' . $user['username'] . ' has logged out.', Log::INFO, 'plg_system_joomlabuilder');
     }
 }
- 

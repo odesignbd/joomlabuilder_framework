@@ -1,74 +1,51 @@
 <?php
+/**
+ * JoomlaBuilder Plugin Parameters Configuration
+ * @package     JoomlaBuilder
+ * @subpackage  Plugin Parameters
+ * @author      BS Digital Services & Ventures
+ * @license     GNU General Public License
+ */
+
 // No direct access
 defined('_JEXEC') or die('Restricted access');
 
 use Joomla\CMS\Factory;
-use Joomla\CMS\Component\ComponentHelper;
-use Joomla\Registry\Registry;
+use Joomla\CMS\Language\Text;
+use Joomla\CMS\Form\Form;
 
 class JoomlaBuilderParams
 {
     /**
-     * Retrieves plugin parameters.
-     *
-     * @return Registry Plugin parameters as a Joomla Registry object.
+     * Retrieve stored parameters
+     * @return object  Parameters object
      */
     public static function getParams()
     {
         $plugin = Factory::getApplication()->getPlugin('system', 'joomlabuilder');
-        return new Registry($plugin->params);
+        return new JRegistry($plugin->params);
     }
 
     /**
-     * Gets a specific parameter value.
-     *
-     * @param string $key The parameter key.
-     * @param mixed $default The default value if the key is not set.
-     * @return mixed The parameter value.
+     * Save updated parameters
+     * @param   array  $params  Associative array of parameters
+     * @return  boolean
      */
-    public static function getParam($key, $default = null)
+    public static function saveParams($params)
     {
-        $params = self::getParams();
-        return $params->get($key, $default);
-    }
-
-    /**
-     * Checks if debugging mode is enabled.
-     *
-     * @return bool True if debug mode is enabled, false otherwise.
-     */
-    public static function isDebugMode()
-    {
-        return self::getParam('debug_mode', false);
-    }
-
-    /**
-     * Retrieves auto-update setting.
-     *
-     * @return bool True if auto-updates are enabled, false otherwise.
-     */
-    public static function isAutoUpdateEnabled()
-    {
-        return self::getParam('enable_auto_update', true);
-    }
-
-    /**
-     * Retrieves the log level setting.
-     *
-     * @return string Log level (debug, info, warning, error).
-     */
-    public static function getLogLevel()
-    {
-        return self::getParam('log_level', 'info');
-    }
-
-    /**
-     * Checks if security check is enabled.
-     *
-     * @return bool True if security check is enabled, false otherwise.
-     */
-    public static function isSecurityCheckEnabled()
-    {
-        return self::getParam('security_check', true);
+        try {
+            $db    = Factory::getDbo();
+            $query = $db->getQuery(true);
+            $query->update($db->quoteName('#__extensions'))
+                  ->set($db->quoteName('params') . ' = ' . $db->quote(json_encode($params)))
+                  ->where($db->quoteName('element') . ' = ' . $db->quote('joomlabuilder'))
+                  ->where($db->quoteName('folder') . ' = ' . $db->quote('system'));
+            $db->setQuery($query);
+            $db->execute();
+            return true;
+        } catch (Exception $e) {
+            Factory::getApplication()->enqueueMessage(Text::_('PLG_SYSTEM_JOOMLABUILDER_ERROR_SAVING_PARAMS'), 'error');
+            return false;
+        }
     }
 }

@@ -1,81 +1,70 @@
- 
 <?php
+/**
+ * JoomlaBuilder Security System
+ * @package     JoomlaBuilder
+ * @subpackage  Plugin Security Management
+ * @author      BS Digital Services & Ventures
+ * @license     GNU General Public License
+ */
+
 // No direct access
 defined('_JEXEC') or die('Restricted access');
 
 use Joomla\CMS\Factory;
-use Joomla\CMS\User\UserHelper;
 use Joomla\CMS\Session\Session;
 use Joomla\CMS\Uri\Uri;
-use Joomla\CMS\Log\Log;
-use Joomla\CMS\Language\Text;
 
 class JoomlaBuilderSecurity
 {
     /**
-     * Enforces secure session handling.
+     * Check if user is logged in
+     * @return bool True if user is logged in, False otherwise
      */
-    public static function enforceSecureSession()
+    public static function isUserLoggedIn()
     {
-        $session = Factory::getSession();
-        $session->restart();
+        $user = Factory::getUser();
+        return !$user->guest;
     }
 
     /**
-     * Sanitizes user input to prevent XSS attacks.
-     *
-     * @param string $input The user input.
-     * @return string The sanitized input.
+     * Generate CSRF Token
+     * @return string CSRF Token
      */
-    public static function sanitizeInput($input)
+    public static function generateToken()
     {
-        return htmlspecialchars(strip_tags(trim($input)), ENT_QUOTES, 'UTF-8');
+        return Session::getFormToken();
     }
 
     /**
-     * Checks for brute-force login attempts and blocks excessive attempts.
+     * Validate CSRF Token
+     * @return bool True if valid, False otherwise
      */
-    public static function preventBruteForce()
+    public static function validateToken()
     {
-        $app = Factory::getApplication();
-        $ip = $_SERVER['REMOTE_ADDR'];
-        $db = Factory::getDbo();
+        return Session::checkToken();
+    }
 
-        $query = $db->getQuery(true)
-            ->select('COUNT(*)')
-            ->from($db->quoteName('#__failed_logins'))
-            ->where($db->quoteName('ip') . ' = ' . $db->quote($ip))
-            ->where($db->quoteName('attempt_time') . ' > DATE_SUB(NOW(), INTERVAL 15 MINUTE)');
-        $db->setQuery($query);
-        $attempts = $db->loadResult();
-
-        if ($attempts > 5) {
-            Log::add(Text::_('PLG_SYSTEM_JOOMLABUILDER_SECURITY_BRUTE_FORCE_BLOCKED') . ' - ' . $ip, Log::WARNING, 'security');
-            $app->enqueueMessage(Text::_('PLG_SYSTEM_JOOMLABUILDER_SECURITY_TOO_MANY_ATTEMPTS'), 'error');
-            $app->redirect(Uri::root());
+    /**
+     * Sanitize Input Data
+     * @param mixed $data Input data
+     * @return mixed Sanitized data
+     */
+    public static function sanitizeInput($data)
+    {
+        if (is_array($data)) {
+            return array_map('htmlspecialchars', $data);
         }
+        return htmlspecialchars($data, ENT_QUOTES, 'UTF-8');
     }
 
     /**
-     * Validates CSRF token to prevent cross-site request forgery attacks.
+     * Enforce HTTPS
      */
-    public static function validateCsrfToken()
+    public static function enforceHTTPS()
     {
-        $session = Factory::getSession();
-        $token = $session->getFormToken();
-        if (!isset($_POST[$token]) && !isset($_GET[$token])) {
-            throw new Exception(Text::_('PLG_SYSTEM_JOOMLABUILDER_SECURITY_CSRF_ERROR'), 403);
+        if (!Uri::getInstance()->isSSL()) {
+            header('Location: ' . Uri::getInstance()->toString(['scheme', 'host', 'path']), true, 301);
+            exit;
         }
-    }
-
-    /**
-     * Logs security-related events.
-     *
-     * @param string $message Security message.
-     * @param string $level Log level (info, warning, error).
-     */
-    public static function logSecurityEvent($message, $level = 'warning')
-    {
-        Log::add($message, constant('JLog::' . strtoupper($level)), 'security');
     }
 }
